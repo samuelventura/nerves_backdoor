@@ -28,6 +28,7 @@ defmodule NervesBackdoor.MixProject do
 
   defp deps do
     [
+      {:plug, "~> 1.7"},
       {:poison, "~> 5.0"},
       {:plug_cowboy, "~> 2.5"}
     ]
