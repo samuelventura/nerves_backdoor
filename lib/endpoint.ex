@@ -21,6 +21,7 @@ defmodule NervesBackdoor.Endpoint do
   end
 
   #curl -F 'data=@/tmp/test.txt' http://localhost:31680/upload?path=/tmp/testup.txt
+  #curl -F 'data=@/tmp/test.txt' http://nerves.local:31680/upload?path=/tmp/test.txt
   post "/upload" do
     {:ok, upload} = Map.fetch conn.params, "data"
     {:ok, path} = Map.fetch conn.query_params, "path"
@@ -29,6 +30,7 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, result)
   end
 
+  #https://github.com/samuelventura/nerves_backdoor/blob/main/VintageNet.md
   #curl http://localhost:31680/net/state/eth0
   #curl http://nerves.local:31680/net/state/eth0
   get "/net/state/:interface" do
@@ -39,23 +41,30 @@ defmodule NervesBackdoor.Endpoint do
 
   #curl http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
   #curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
+  #curl http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
+  #curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
   post "/net/setup/:interface" do
     {:ok, interface} = Map.fetch conn.path_params, "interface"
     result = NervesBackdoor.net_setup interface, conn.body_params
     respond(conn, result)
   end
 
+  #Application.started_applications
+  #Application.loaded_applications
+  #Application.get_all_env :nss
   #curl http://localhost:31680/app/start/nss
+  #curl http://nerves.local:31680/app/start/nss
   get "/app/start/:app" do
     {:ok, app} = Map.fetch conn.path_params, "app"
     result = case app_loaded(app) do
       nil -> {:error, "App not found #{app}"}
-      {appa, _desc} -> Application.start appa, :permanent
+      {appa, _desc, _ver} -> Application.start appa, :permanent
     end
     respond(conn, result)
   end
 
   #curl http://localhost:31680/app/stop/nss
+  #curl http://nerves.local:31680/app/stop/nss
   get "/app/stop/:app" do
     {:ok, app} = Map.fetch conn.path_params, "app"
     result = case app_loaded(app) do
@@ -78,6 +87,16 @@ defmodule NervesBackdoor.Endpoint do
       {:ok, message} -> send_resp(conn, 200, Jason.encode!(%{result: "ok", message: message}))
       {:error, message} -> send_resp(conn, 500, Jason.encode!(%{result: "error", message: message}))
       end
+  end
+
+  alias Jason.Encoder
+
+  defimpl Encoder, for: Tuple do
+    def encode(data, options) when is_tuple(data) do
+      data
+      |> Tuple.to_list()
+      |> Encoder.List.encode(options)
+    end
   end
 
   plug(:dispatch)
