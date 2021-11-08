@@ -8,4 +8,6 @@ cd backdoor
 mix deps.get
 mix compile
 mix run --no-halt
+iex -S mix
+recompile
 ```

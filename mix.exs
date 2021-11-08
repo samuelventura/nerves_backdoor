@@ -15,21 +15,14 @@ defmodule NervesBackdoor.MixProject do
     [
       extra_applications: [:logger],
       mod: {NervesBackdoor.Application, []},
-      env: [port: port()]
+      env: [port: 31680]
     ]
-  end
-
-  defp port do
-    case Mix.env() do
-      :prod -> 80
-      _ -> 4000
-    end
   end
 
   defp deps do
     [
       {:plug, "~> 1.7"},
-      {:poison, "~> 5.0"},
+      {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"}
     ]
   end
