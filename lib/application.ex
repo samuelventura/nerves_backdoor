@@ -4,6 +4,7 @@ defmodule NervesBackdoor.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {NervesBackdoor.Discovery, Application.get_env(:nerves_backdoor, :port)},
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: NervesBackdoor.Endpoint,

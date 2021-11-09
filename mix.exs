@@ -26,7 +26,7 @@ defmodule NervesBackdoor.MixProject do
     [
       extra_applications: [:logger],
       mod: {NervesBackdoor.Application, []},
-      env: [port: 31680]
+      env: [port: 31680, name: "nerves", version: @version]
     ]
   end
 
