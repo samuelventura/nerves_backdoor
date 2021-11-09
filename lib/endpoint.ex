@@ -1,6 +1,20 @@
 defmodule NervesBackdoor.Endpoint do
   use Plug.Router
 
+  plug(:auth)
+
+  defp auth(conn, _opts) do
+    case NervesBackdoor.Environ.safe?() do
+      true ->
+        username = NervesBackdoor.Environ.name()
+        password = NervesBackdoor.Environ.password(:current)
+        Plug.BasicAuth.basic_auth(conn, username: username, password: password)
+
+      false ->
+        conn
+    end
+  end
+
   plug(:match)
 
   # curl http://localhost:31680/tmp/test.txt
@@ -19,7 +33,7 @@ defmodule NervesBackdoor.Endpoint do
   end
 
   # curl -F 'data=@/tmp/test.txt' http://localhost:31680/upload?path=/tmp/testup.txt
-  # curl -F 'data=@/tmp/test.txt' http://nerves.local:31680/upload?path=/tmp/test.txt
+  # curl -F 'data=@/tmp/test.txt' http://nerves.local:31680/upload?path=/tmp/testup.txt
   post "/upload" do
     {:ok, upload} = Map.fetch(conn.params, "data")
     {:ok, path} = Map.fetch(conn.query_params, "path")
@@ -28,11 +42,19 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, result)
   end
 
+  # curl -X DELETE http://localhost:31680/delete?path=/tmp/testup.txt
+  # curl -X DELETE http://nerves.local:31680/delete?path=/tmp/testup.txt
+  delete "/delete" do
+    {:ok, path} = Map.fetch(conn.query_params, "path")
+    result = File.rm(path)
+    respond(conn, result)
+  end
+
   # curl http://localhost:31680/net/all
   # curl http://nerves.local:31680/net/all
   get "/net/all" do
-    {:ok, data} = :inet.getifaddrs()
-    respond(conn, {:ok, Kernel.inspect(data)})
+    list = NervesBackdoor.Vintage.all_interfaces()
+    respond(conn, {:ok, list})
   end
 
   # VintageNet.info
@@ -44,7 +66,7 @@ defmodule NervesBackdoor.Endpoint do
   # curl http://nerves.local:31680/net/state/eth0
   get "/net/state/:interface" do
     {:ok, interface} = Map.fetch(conn.path_params, "interface")
-    result = NervesBackdoor.net_state(interface)
+    result = NervesBackdoor.Vintage.get_configuration(interface)
     respond(conn, result)
   end
 
@@ -56,7 +78,7 @@ defmodule NervesBackdoor.Endpoint do
   # curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
   post "/net/setup/:interface" do
     {:ok, interface} = Map.fetch(conn.path_params, "interface")
-    result = NervesBackdoor.net_setup(interface, conn.body_params)
+    result = NervesBackdoor.Vintage.configure(interface, conn.body_params)
     respond(conn, result)
   end
 

@@ -3,12 +3,16 @@ defmodule NervesBackdoor.Application do
 
   @impl true
   def start(_type, _args) do
+    # create folder
+    NervesBackdoor.Environ.port()
+    port = NervesBackdoor.Environ.port()
+
     children = [
-      {NervesBackdoor.Discovery, Application.get_env(:nerves_backdoor, :port)},
+      {NervesBackdoor.Discovery, port},
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: NervesBackdoor.Endpoint,
-        options: [port: Application.get_env(:nerves_backdoor, :port)]
+        options: [port: port]
       )
     ]
 

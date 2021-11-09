@@ -1,8 +1,9 @@
 # NervesBackdoor
 
-This RESTish API covers the following basic needs:
+RESTish API to cover basic mainteance needs:
 
 - Network setup (eth0)
+- Device discovery (UDP broadcast)
 - Database backup and restore
 - Password reset (thru file upload) 
 
@@ -57,4 +58,4 @@ be found at [https://hexdocs.pm/nerves_backdoor](https://hexdocs.pm/nerves_backd
 ## Research
 
 - Restrict cowboy listener to usb0 interface
-- Device discovery
+- Basic auth

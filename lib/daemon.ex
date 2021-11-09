@@ -11,36 +11,33 @@ defmodule NervesBackdoor.Daemon do
 
   @impl true
   def init(path) do
-    IO.inspect({"init", path})
     port = run(path)
-    IO.inspect({"state", {path, port}})
     {:ok, {path, port}}
   end
 
   @impl true
-  def terminate(reason, state = {_path, port}) do
-    IO.inspect({"terminate", reason, state})
+  def terminate(reason, _state = {path, port}) do
+    IO.inspect({path, :terminate, reason})
     true = Port.close(port)
   end
 
   @impl true
-  def handle_info({_port, {:data, data}}, state) do
-    IO.inspect({state, data})
+  def handle_info({_port, {:data, data}}, state = {path, _}) do
+    IO.inspect({path, :data, data})
     {:noreply, state}
   end
 
   @impl true
-  def handle_info({:DOWN, _ref, :port, port, reason}, state = {path, _}) do
-    IO.inspect({state, "down", port, reason})
+  def handle_info({:DOWN, _ref, :port, _port, reason}, _state = {path, _}) do
+    IO.inspect({path, :down, reason})
     port = run(path)
-    IO.inspect({"state", {path, port}})
     {:noreply, {path, port}}
   end
 
   defp run(path) do
     env = {:env, env(path)}
     opts = [env | @spawn_opts]
-    IO.inspect({"run", path, env})
+    IO.inspect({path, :run, env})
     port = Port.open({:spawn_executable, path}, opts)
     _ref = Port.monitor(port)
     port
