@@ -30,7 +30,11 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, result)
   end
 
-  #https://github.com/samuelventura/nerves_backdoor/blob/main/VintageNet.md
+  #VintageNet.info
+  #VintageNet.get_configuration("eth0")
+  #VintageNet.get(["interface", "eth0", "type"])
+  #VintageNet.get(["interface", "eth0", "state"])
+  #VintageNet.get(["interface", "eth0", "connection"])
   #curl http://localhost:31680/net/state/eth0
   #curl http://nerves.local:31680/net/state/eth0
   get "/net/state/:interface" do
@@ -39,6 +43,8 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, result)
   end
 
+  #VintageNet.configure("eth0", %{type: VintageNetEthernet, ipv4: %{method: :dhcp}})
+  #VintageNet.configure("eth0", %{type: VintageNetEthernet, ipv4: %{method: :static, address: "10.77.4.100", prefix_length: 8, gateway: "10.77.0.1", name_servers: ["10.77.0.1"]}})
   #curl http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
   #curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
   #curl http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
