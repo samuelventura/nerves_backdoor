@@ -73,4 +73,21 @@ defmodule NervesBackdoor.Environ do
     :ok = :erlang.apply(Circuits.GPIO, :close, [gpio])
     state == 1
   end
+
+  def blink() do
+    io = NervesBackdoor.Environ.io_led()
+    {:ok, gpio} = :erlang.apply(Circuits.GPIO, :open, [io, :output])
+    :ok = :erlang.apply(Circuits.GPIO, :write, [gpio, 1])
+    :timer.sleep(200)
+    :ok = :erlang.apply(Circuits.GPIO, :write, [gpio, 0])
+    :timer.sleep(200)
+    :ok = :erlang.apply(Circuits.GPIO, :write, [gpio, 1])
+    :timer.sleep(200)
+    :ok = :erlang.apply(Circuits.GPIO, :write, [gpio, 0])
+    :timer.sleep(200)
+    :ok = :erlang.apply(Circuits.GPIO, :write, [gpio, 1])
+    :timer.sleep(200)
+    :ok = :erlang.apply(Circuits.GPIO, :write, [gpio, 0])
+    :ok = :erlang.apply(Circuits.GPIO, :close, [gpio])
+  end
 end
