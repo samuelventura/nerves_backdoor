@@ -1,8 +1,15 @@
 defmodule NervesBackdoorTest do
   use ExUnit.Case
-  doctest NervesBackdoor
+  use Plug.Test
 
-  test "greets the world" do
-    assert 1 == 1
+  alias NervesBackdoor.Endpoint, as: EP
+  @opts EP.init([])
+
+  test "ping pong" do
+    conn = conn(:get, "/ping")
+    conn = EP.call(conn, @opts)
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert conn.resp_body == "world"
   end
 end
