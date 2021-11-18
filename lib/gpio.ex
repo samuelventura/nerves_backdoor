@@ -39,13 +39,37 @@ defmodule NervesBackdoor.GPIO do
   def handle_call(req, _from, state) do
     res =
       case req do
-        {:output, port} -> :erlang.apply(Circuits.GPIO, :open, [port, :output])
-        {:input, port} -> :erlang.apply(Circuits.GPIO, :open, [port, :input])
-        {:write, gpio, value} -> :erlang.apply(Circuits.GPIO, :write, [gpio, value])
-        {:read, gpio} -> :erlang.apply(Circuits.GPIO, :read, [gpio])
-        {:close, gpio} -> :erlang.apply(Circuits.GPIO, :close, [gpio])
+        {:output, port} -> io_output(port)
+        {:input, port} -> io_input(port)
+        {:write, gpio, value} -> io_write(gpio, value)
+        {:read, gpio} -> io_read(gpio)
+        {:close, gpio} -> io_close(gpio)
       end
 
     {:reply, res, state}
+  end
+
+  def io_output(port) do
+    :erlang.apply(Circuits.GPIO, :open, [port, :output])
+  end
+
+  def io_input(port) do
+    :erlang.apply(Circuits.GPIO, :open, [port, :input])
+  end
+
+  def io_write(gpio, value) do
+    :erlang.apply(Circuits.GPIO, :write, [gpio, value])
+  end
+
+  def io_read(gpio) do
+    :erlang.apply(Circuits.GPIO, :read, [gpio])
+  end
+
+  def io_rising(gpio) do
+    :erlang.apply(Circuits.GPIO, :set_interrupts, [gpio, :rising])
+  end
+
+  def io_close(gpio) do
+    :erlang.apply(Circuits.GPIO, :close, [gpio])
   end
 end

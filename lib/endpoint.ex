@@ -4,15 +4,13 @@ defmodule NervesBackdoor.Endpoint do
   plug(:auth)
 
   defp auth(conn, _opts) do
-    case NervesBackdoor.Environ.ask_pwd?() do
-      true ->
-        username = NervesBackdoor.Environ.name()
-        password = NervesBackdoor.Environ.password(:current)
-        Plug.BasicAuth.basic_auth(conn, username: username, password: password)
-
-      false ->
-        conn
-    end
+      username = NervesBackdoor.Environ.name()
+      password = NervesBackdoor.Environ.password(:current)
+      #disable password check by uploading empty password file
+      case String.length(password) do
+      0 -> conn
+      _ -> Plug.BasicAuth.basic_auth(conn, username: username, password: password)
+      end
   end
 
   plug(:match)

@@ -6,6 +6,7 @@ defmodule NervesBackdoor.Application do
     port = NervesBackdoor.Environ.port()
 
     children = [
+      {NervesBackdoor.Reset, []},
       {NervesBackdoor.GPIO, []},
       {NervesBackdoor.Vintage, []},
       {NervesBackdoor.Discovery, []},

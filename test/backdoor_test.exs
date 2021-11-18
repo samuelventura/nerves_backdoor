@@ -7,6 +7,7 @@ defmodule NervesBackdoorTest do
 
   test "ping pong" do
     conn = conn(:get, "/ping")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -18,6 +19,7 @@ defmodule NervesBackdoorTest do
     File.write!("/tmp/upload1.txt", "upload-test")
     upload = %Plug.Upload{path: "/tmp/upload1.txt", filename: "upload1.txt"}
     conn = conn(:post, "/upload?path=/tmp/upload2.txt", %{:file => upload})
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -28,6 +30,7 @@ defmodule NervesBackdoorTest do
   test "download from /tmp" do
     File.write!("/tmp/download1.txt", "download-test")
     conn = conn(:get, "/tmp/download1.txt")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :file
     assert conn.status == 200
@@ -37,6 +40,7 @@ defmodule NervesBackdoorTest do
   test "delete from /tmp" do
     File.write!("/tmp/delete1.txt", "delete-test")
     conn = conn(:delete, "/delete?path=/tmp/delete1.txt")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -46,6 +50,7 @@ defmodule NervesBackdoorTest do
   test "start app" do
     Application.stop(:public_key)
     conn = conn(:post, "/app/start/public_key")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -54,6 +59,7 @@ defmodule NervesBackdoorTest do
 
   test "stop app" do
     conn = conn(:post, "/app/stop/public_key")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -63,6 +69,7 @@ defmodule NervesBackdoorTest do
 
   test "net all" do
     conn = conn(:get, "/net/all")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -74,12 +81,14 @@ defmodule NervesBackdoorTest do
 
   test "net config eth0" do
     conn = conn(:post, "/net/setup/eth0", %{method: "dhcp"})
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
     assert Jason.decode!(conn.resp_body) == %{"result" => "ok"}
 
     conn = conn(:get, "/net/state/eth0")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -89,12 +98,14 @@ defmodule NervesBackdoorTest do
 
     conn = conn(:post, "/net/setup/eth0", %{method: "static", address: "10.77.4.100",
       prefix_length: 8, gateway: "10.77.0.1", name_servers: ["10.77.0.1"]})
-    conn = EP.call(conn, @opts)
+      conn = basic_auth(conn)
+      conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
     assert Jason.decode!(conn.resp_body) == %{"result" => "ok"}
 
     conn = conn(:get, "/net/state/eth0")
+    conn = basic_auth(conn)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
@@ -129,30 +140,40 @@ defmodule NervesBackdoorTest do
   end
 
   test "http basic auth" do
-    NervesBackdoor.Environ.ask_pwd(1)
     conn = conn(:get, "/ping")
     conn = EP.call(conn, @opts)
     assert conn.state == :set
     assert conn.status == 401
 
-    File.rm("/tmp/data/backdoor/password.txt")
-    auth = "Basic " <> Base.encode64("nerves:000000000000")
+    #disable password check
+    File.mkdir_p("/tmp/backdoor")
+    File.write!("/tmp/backdoor/password.txt", "")
     conn = conn(:get, "/ping")
-      |> put_req_header("authorization", auth)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
 
-    File.write!("/tmp/data/backdoor/password.txt", "otherpass")
-    assert NervesBackdoor.Environ.password(:current) == "otherpass"
+    #reenable password check
+    password = "otherpass"
+    File.write!("/tmp/backdoor/password.txt", password)
+    conn = conn(:get, "/ping")
+    conn = EP.call(conn, @opts)
+    assert conn.state == :set
+    assert conn.status == 401
+
+    assert NervesBackdoor.Environ.password(:current) == password
     username = NervesBackdoor.Environ.name()
-    auth = "Basic " <> Base.encode64(username <> ":otherpass")
+    auth = "Basic " <> Base.encode64(username <> ":" <> password)
     conn = conn(:get, "/ping")
       |> put_req_header("authorization", auth)
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
+    File.rm("/tmp/backdoor/password.txt")
+  end
 
-    NervesBackdoor.Environ.ask_pwd(0)
+  def basic_auth(conn) do
+    value = "Basic " <> Base.encode64("nerves:000000000000")
+    put_req_header(conn, "authorization", value)
   end
 end

@@ -1,4 +1,8 @@
 defmodule NervesBackdoor.Environ do
+  def home() do
+    Application.get_env(:nerves_backdoor, :home)
+  end
+
   def name() do
     Application.get_env(:nerves_backdoor, :name)
   end
@@ -23,24 +27,12 @@ defmodule NervesBackdoor.Environ do
     Application.get_env(:nerves_backdoor, :io_led)
   end
 
-  def io_sw() do
-    Application.get_env(:nerves_backdoor, :io_sw)
+  def io_btn() do
+    Application.get_env(:nerves_backdoor, :io_btn)
   end
 
   def blink_ms() do
     Application.get_env(:nerves_backdoor, :blink_ms)
-  end
-
-  def folder() do
-    data = case File.mkdir_p("/data/backdoor") do
-      :ok ->
-        "/data"
-
-      _ ->
-        File.mkdir_p!("/tmp/data/backdoor")
-        "/tmp/data"
-    end
-    Path.join(data, "backdoor")
   end
 
   def mac() do
@@ -56,7 +48,7 @@ defmodule NervesBackdoor.Environ do
       :default -> mac()
 
       :current ->
-        path = Path.join(folder(), "password.txt")
+        path = passpath()
 
         case File.read(path) do
           {:ok, data} -> String.trim(data)
@@ -65,24 +57,17 @@ defmodule NervesBackdoor.Environ do
     end
   end
 
+  def passreset() do
+    File.rm(passpath())
+  end
+
+  def passpath() do
+    Path.join(home(), "password.txt")
+  end
+
   def gethostname() do
     {:ok, hostname} = :inet.gethostname()
     hostname |> to_string
-  end
-
-  def ask_pwd?() do
-    io = io_sw()
-    {:ok, gpio} = NervesBackdoor.GPIO.input(io)
-    state = NervesBackdoor.GPIO.read(gpio)
-    :ok = NervesBackdoor.GPIO.close(gpio)
-    state == 1
-  end
-
-  def ask_pwd(value) do
-    io = io_sw()
-    {:ok, gpio} = NervesBackdoor.GPIO.input(io)
-    :ok = NervesBackdoor.GPIO.write(gpio, value)
-    :ok = NervesBackdoor.GPIO.close(gpio)
   end
 
   def blink() do
