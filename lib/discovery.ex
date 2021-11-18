@@ -1,17 +1,8 @@
 defmodule NervesBackdoor.Discovery do
   use GenServer
 
-  # {:ok, pid} = NervesBackdoor.Discovery.start_link 31680
-  # :ok = GenServer.stop pid
-  # {:ok, socket} = :gen_udp.open(0, active: true, broadcast: true)
-  # id_cmd = Jason.encode! %{action: "id", name: "nerves"}
-  # blink_cmd = Jason.encode! %{action: "id", name: "nerves"}
-  # :ok = :gen_udp.send(socket, {127,0,0,1}, 31680, id_cmd)
-  # :ok = :gen_udp.send(socket, {127,0,0,1}, 31680, blink_cmd)
-  # :ok = :gen_udp.send(socket, {255,255,255,255}, 31680, id_cmd)
-  # :ok = :gen_udp.close(socket)
-  # flush()
-  def start_link(port) do
+  def start_link(_opts \\ []) do
+    port = NervesBackdoor.Environ.port()
     GenServer.start_link(__MODULE__, port)
   end
 
@@ -44,11 +35,13 @@ defmodule NervesBackdoor.Discovery do
           ifname: ifname,
           macaddr: macaddr
         }
+        message = Map.put(message, :data, data)
 
-        :ok = :gen_udp.send(socket, ip, port, Jason.encode!(data))
+        :ok = :gen_udp.send(socket, ip, port, Jason.encode!(message))
 
         %{"action"=> "blink", "name"=> ^name} ->
           NervesBackdoor.Environ.blink()
+          :ok = :gen_udp.send(socket, ip, port, Jason.encode!(message))
     end
 
     {:noreply, state}

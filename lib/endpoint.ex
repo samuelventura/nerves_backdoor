@@ -4,7 +4,7 @@ defmodule NervesBackdoor.Endpoint do
   plug(:auth)
 
   defp auth(conn, _opts) do
-    case NervesBackdoor.Environ.safe?() do
+    case NervesBackdoor.Environ.ask_pwd?() do
       true ->
         username = NervesBackdoor.Environ.name()
         password = NervesBackdoor.Environ.password(:current)
@@ -53,8 +53,8 @@ defmodule NervesBackdoor.Endpoint do
   # curl http://localhost:31680/net/all
   # curl http://nerves.local:31680/net/all
   get "/net/all" do
-    list = NervesBackdoor.Vintage.all_interfaces()
-    respond(conn, {:ok, list})
+    result = NervesBackdoor.Vintage.all_interfaces()
+    respond(conn, result)
   end
 
   # VintageNet.info

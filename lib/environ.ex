@@ -1,13 +1,10 @@
 defmodule NervesBackdoor.Environ do
-  def gpio() do
-    case Mix.env() do
-      :test -> NervesBackdoor.Circuits.GPIO
-      _ -> Circuits.GPIO
-    end
-  end
-
   def name() do
     Application.get_env(:nerves_backdoor, :name)
+  end
+
+  def hostname() do
+    Application.get_env(:nerves_backdoor, :hostname, gethostname())
   end
 
   def version() do
@@ -30,12 +27,12 @@ defmodule NervesBackdoor.Environ do
     Application.get_env(:nerves_backdoor, :io_sw)
   end
 
-  def folder() do
-    Path.join(data(), "backdoor")
+  def blink_ms() do
+    Application.get_env(:nerves_backdoor, :blink_ms)
   end
 
-  def data() do
-    case File.mkdir_p("/data/backdoor") do
+  def folder() do
+    data = case File.mkdir_p("/data/backdoor") do
       :ok ->
         "/data"
 
@@ -43,6 +40,7 @@ defmodule NervesBackdoor.Environ do
         File.mkdir_p!("/tmp/data/backdoor")
         "/tmp/data"
     end
+    Path.join(data, "backdoor")
   end
 
   def mac() do
@@ -55,25 +53,24 @@ defmodule NervesBackdoor.Environ do
 
   def password(type) do
     case type do
-      :default ->
-        mac() |> String.replace(":", "")
+      :default -> mac()
 
       :current ->
         path = Path.join(folder(), "password.txt")
 
         case File.read(path) do
           {:ok, data} -> String.trim(data)
-          _ -> password(:default)
+          _ -> mac()
         end
     end
   end
 
-  def hostname() do
+  def gethostname() do
     {:ok, hostname} = :inet.gethostname()
     hostname |> to_string
   end
 
-  def safe?() do
+  def ask_pwd?() do
     io = io_sw()
     {:ok, gpio} = NervesBackdoor.GPIO.input(io)
     state = NervesBackdoor.GPIO.read(gpio)
@@ -81,19 +78,27 @@ defmodule NervesBackdoor.Environ do
     state == 1
   end
 
+  def ask_pwd(value) do
+    io = io_sw()
+    {:ok, gpio} = NervesBackdoor.GPIO.input(io)
+    :ok = NervesBackdoor.GPIO.write(gpio, value)
+    :ok = NervesBackdoor.GPIO.close(gpio)
+  end
+
   def blink() do
     io = NervesBackdoor.Environ.io_led()
+    ms = NervesBackdoor.Environ.blink_ms()
     {:ok, gpio} = NervesBackdoor.GPIO.output(io)
     :ok = NervesBackdoor.GPIO.write(gpio, 1)
-    :timer.sleep(200)
+    :timer.sleep(ms)
     :ok = NervesBackdoor.GPIO.write(gpio, 0)
-    :timer.sleep(200)
+    :timer.sleep(ms)
     :ok = NervesBackdoor.GPIO.write(gpio, 1)
-    :timer.sleep(200)
+    :timer.sleep(ms)
     :ok = NervesBackdoor.GPIO.write(gpio, 0)
-    :timer.sleep(200)
+    :timer.sleep(ms)
     :ok = NervesBackdoor.GPIO.write(gpio, 1)
-    :timer.sleep(200)
+    :timer.sleep(ms)
     :ok = NervesBackdoor.GPIO.write(gpio, 0)
     :ok = NervesBackdoor.GPIO.close(gpio)
   end

@@ -35,7 +35,7 @@ defmodule NervesBackdoor.TestGPIO do
   end
 end
 
-defmodule NervesBackdoor.TestVintage do
+defmodule NervesBackdoor.TestVintageNet do
   use GenServer
 
   def start_link(_opts \\ []) do
@@ -62,54 +62,27 @@ defmodule NervesBackdoor.TestVintage do
 
   @impl true
   def handle_call(req, _from, state) do
-    res =
       case req do
         {:all_interfaces} ->
-          ["eth0", "usb0", "lo"]
+          res = ["eth0", "usb0", "lo"]
+          {:reply, {:ok, res}, state}
 
-        {:config, interface, params} ->
-          method = Map.fetch!(params, "method")
-
-          config =
-            case method do
-              "dhcp" ->
-                %{type: VintageNetEthernet, ipv4: %{method: :dhcp}}
-
-              "static" ->
-                address = Map.fetch!(params, "address")
-                prefix_length = Map.fetch!(params, "prefix_length")
-                gateway = Map.fetch!(params, "gateway")
-                name_servers = Map.fetch!(params, "name_servers")
-
-                %{
-                  type: VintageNetEthernet,
-                  ipv4: %{
-                    method: :static,
-                    # string
-                    address: address,
-                    # integer
-                    prefix_length: prefix_length,
-                    # string
-                    gateway: gateway,
-                    # list of strings
-                    name_servers: name_servers
-                  }
-                }
-            end
-
-          :erlang.apply(VintageNet, :configure, [interface, config])
+        {:configure, interface, params} ->
+          state = Map.put(state, interface, params)
+          {:reply, :ok, state}
 
         {:get_configuration, interface} ->
-          state = :erlang.apply(VintageNet, :get, [["interface", interface, "state"]])
-          connection = :erlang.apply(VintageNet, :get, [["interface", interface, "connection"]])
-          config = :erlang.apply(VintageNet, :get_configuration, [interface])
-          {:ok, %{interface: interface, state: state, connection: connection, config: config}}
-      end
-
-    {:reply, res, state}
+          config = Map.get(state, interface, %{method: "dhcp"})
+          res = %{interface: interface, state: "configured", connection: "disconnected", config: config}
+          {:reply, {:ok, res}, state}
+        end
   end
 end
 
 Application.start(:telemetry)
+Application.put_env(:nerves_backdoor, :blink_ms, 0)
+Application.put_env(:nerves_backdoor, :ifname, "ethx")
+Application.put_env(:nerves_backdoor, :hostname, "test")
+NervesBackdoor.Discovery.start_link()
 NervesBackdoor.TestGPIO.start_link()
-NervesBackdoor.TestVintage.start_link()
+NervesBackdoor.TestVintageNet.start_link()

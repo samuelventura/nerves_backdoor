@@ -66,10 +66,93 @@ defmodule NervesBackdoorTest do
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
-
     assert Jason.decode!(conn.resp_body) == %{
              "result" => "ok",
              "message" => ["eth0", "usb0", "lo"]
            }
+  end
+
+  test "net config eth0" do
+    conn = conn(:post, "/net/setup/eth0", %{method: "dhcp"})
+    conn = EP.call(conn, @opts)
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert Jason.decode!(conn.resp_body) == %{"result" => "ok"}
+
+    conn = conn(:get, "/net/state/eth0")
+    conn = EP.call(conn, @opts)
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert Jason.decode!(conn.resp_body) == %{"message" =>
+      %{"config" => %{"method" => "dhcp"}, "connection" => "disconnected",
+      "interface" => "eth0", "state" => "configured"}, "result" => "ok"}
+
+    conn = conn(:post, "/net/setup/eth0", %{method: "static", address: "10.77.4.100",
+      prefix_length: 8, gateway: "10.77.0.1", name_servers: ["10.77.0.1"]})
+    conn = EP.call(conn, @opts)
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert Jason.decode!(conn.resp_body) == %{"result" => "ok"}
+
+    conn = conn(:get, "/net/state/eth0")
+    conn = EP.call(conn, @opts)
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert Jason.decode!(conn.resp_body) == %{"message" =>
+      %{"config" => %{"method" => "static", "address" => "10.77.4.100", "gateway" => "10.77.0.1",
+      "name_servers" => ["10.77.0.1"], "prefix_length" => 8}, "connection" => "disconnected",
+      "interface" => "eth0", "state" => "configured"}, "result" => "ok"}
+  end
+
+  test "discovery id" do
+    name = NervesBackdoor.Environ.name()
+    cmd = Jason.encode! %{action: "id", name: name}
+    port = NervesBackdoor.Environ.port()
+    {:ok, socket} = :gen_udp.open(0, active: false, broadcast: true)
+    :ok = :gen_udp.send(socket, {127,0,0,1}, port, cmd)
+    msg = :gen_udp.recv(socket, 1024, 1000)
+    {:ok, {{127,0,0,1}, ^port, packet}} = msg
+    assert Jason.decode!(packet) ==  %{"name" => "nerves", "action" => "id", "data" =>
+    %{"hostname" => "test", "ifname" => "ethx", "macaddr" => "000000000000",
+    "name" => "nerves", "version" => "0.1.1"}}
+  end
+
+  test "discovery blink" do
+    name = NervesBackdoor.Environ.name()
+    cmd = Jason.encode! %{action: "blink", name: name}
+    port = NervesBackdoor.Environ.port()
+    {:ok, socket} = :gen_udp.open(0, active: false, broadcast: true)
+    :ok = :gen_udp.send(socket, {127,0,0,1}, port, cmd)
+    msg = :gen_udp.recv(socket, 1024, 1000)
+    {:ok, {{127,0,0,1}, ^port, packet}} = msg
+    assert Jason.decode!(packet) ==  %{"action" => "blink", "name" => "nerves"}
+  end
+
+  test "http basic auth" do
+    NervesBackdoor.Environ.ask_pwd(1)
+    conn = conn(:get, "/ping")
+    conn = EP.call(conn, @opts)
+    assert conn.state == :set
+    assert conn.status == 401
+
+    File.rm("/tmp/data/backdoor/password.txt")
+    auth = "Basic " <> Base.encode64("nerves:000000000000")
+    conn = conn(:get, "/ping")
+      |> put_req_header("authorization", auth)
+    conn = EP.call(conn, @opts)
+    assert conn.state == :sent
+    assert conn.status == 200
+
+    File.write!("/tmp/data/backdoor/password.txt", "otherpass")
+    assert NervesBackdoor.Environ.password(:current) == "otherpass"
+    username = NervesBackdoor.Environ.name()
+    auth = "Basic " <> Base.encode64(username <> ":otherpass")
+    conn = conn(:get, "/ping")
+      |> put_req_header("authorization", auth)
+    conn = EP.call(conn, @opts)
+    assert conn.state == :sent
+    assert conn.status == 200
+
+    NervesBackdoor.Environ.ask_pwd(0)
   end
 end
