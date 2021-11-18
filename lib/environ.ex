@@ -1,4 +1,11 @@
 defmodule NervesBackdoor.Environ do
+  def gpio() do
+    case Mix.env() do
+      :test -> NervesBackdoor.Circuits.GPIO
+      _ -> Circuits.GPIO
+    end
+  end
+
   def name() do
     Application.get_env(:nerves_backdoor, :name)
   end

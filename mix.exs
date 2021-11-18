@@ -12,12 +12,12 @@ defmodule NervesBackdoor.MixProject do
     [
       app: @app,
       version: @version,
-      version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       package: package(),
       deps: deps(),
       docs: docs(),
+      aliases: aliases(),
       description: description()
     ]
   end
@@ -27,6 +27,12 @@ defmodule NervesBackdoor.MixProject do
       extra_applications: [:logger],
       mod: {NervesBackdoor.Application, []},
       env: [port: 31680, name: "nerves", version: @version, ifname: "eth0", io_led: 68, io_sw: 69]
+    ]
+  end
+
+  defp aliases do
+    [
+      test: "test --no-start"
     ]
   end
 

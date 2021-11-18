@@ -32,10 +32,10 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, {:ok, %{ping: "pong"}})
   end
 
-  # curl -F 'data=@/tmp/test.txt' http://localhost:31680/upload?path=/tmp/testup.txt
-  # curl -F 'data=@/tmp/test.txt' http://nerves.local:31680/upload?path=/tmp/testup.txt
+  # curl -F 'file=@/tmp/test.txt' http://localhost:31680/upload?path=/tmp/testup.txt
+  # curl -F 'file=@/tmp/test.txt' http://nerves.local:31680/upload?path=/tmp/testup.txt
   post "/upload" do
-    {:ok, upload} = Map.fetch(conn.params, "data")
+    {:ok, upload} = Map.fetch(conn.params, "file")
     {:ok, path} = Map.fetch(conn.query_params, "path")
     result = File.copy(upload.path, path)
     File.rm(upload.path)
@@ -72,10 +72,10 @@ defmodule NervesBackdoor.Endpoint do
 
   # VintageNet.configure("eth0", %{type: VintageNetEthernet, ipv4: %{method: :dhcp}})
   # VintageNet.configure("eth0", %{type: VintageNetEthernet, ipv4: %{method: :static, address: "10.77.4.100", prefix_length: 8, gateway: "10.77.0.1", name_servers: ["10.77.0.1"]}})
-  # curl http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
-  # curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
-  # curl http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
-  # curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
+  # curl -X POST http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -d '{"method":"dhcp"}'
+  # curl -X POST http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -d '{"method":"dhcp"}'
+  # curl -X POST http://localhost:31680/net/setup/eth0 -H "Content-Type: application/json" -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
+  # curl -X POST http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
   post "/net/setup/:interface" do
     {:ok, interface} = Map.fetch(conn.path_params, "interface")
     result = NervesBackdoor.Vintage.configure(interface, conn.body_params)
@@ -85,9 +85,9 @@ defmodule NervesBackdoor.Endpoint do
   # Application.started_applications
   # Application.loaded_applications
   # Application.get_all_env :nss
-  # curl http://localhost:31680/app/start/nss
-  # curl http://nerves.local:31680/app/start/nss
-  get "/app/start/:app" do
+  # curl -X POST http://localhost:31680/app/start/nss
+  # curl -X POST http://nerves.local:31680/app/start/nss
+  post "/app/start/:app" do
     {:ok, app} = Map.fetch(conn.path_params, "app")
 
     result =
@@ -99,9 +99,9 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, result)
   end
 
-  # curl http://localhost:31680/app/stop/nss
-  # curl http://nerves.local:31680/app/stop/nss
-  get "/app/stop/:app" do
+  # curl -X POST http://localhost:31680/app/stop/nss
+  # curl -X POST http://nerves.local:31680/app/stop/nss
+  post "/app/stop/:app" do
     {:ok, app} = Map.fetch(conn.path_params, "app")
 
     result =

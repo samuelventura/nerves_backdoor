@@ -8,6 +8,8 @@ defmodule NervesBackdoor.Application do
     port = NervesBackdoor.Environ.port()
 
     children = [
+      {NervesBackdoor.GPIO, []},
+      {NervesBackdoor.Vintage, []},
       {NervesBackdoor.Discovery, port},
       Plug.Cowboy.child_spec(
         scheme: :http,
