@@ -45,10 +45,11 @@ defmodule NervesBackdoor do
 
   def password(type \\ :current) do
     case type do
-      :default -> mac()
+      :default ->
+        mac()
 
       :current ->
-        path = passpath()
+        path = pass_path()
 
         case File.read(path) do
           {:ok, data} -> String.trim(data)
@@ -57,16 +58,16 @@ defmodule NervesBackdoor do
     end
   end
 
-  def passreset() do
+  def pass_reset() do
     File.mkdir_p(home())
-    File.rm(passpath())
+    File.rm(pass_path())
   end
 
-  def passset(password) do
-    File.write(passpath(), password)
+  def pass_set(password) do
+    File.write(pass_path(), password)
   end
 
-  def passpath() do
+  def pass_path() do
     Path.join(home(), "password.txt")
   end
 

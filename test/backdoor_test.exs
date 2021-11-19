@@ -145,17 +145,17 @@ defmodule NervesBackdoorTest do
     assert conn.state == :set
     assert conn.status == 401
 
-    #disable password check
+    # disable password check
     File.mkdir_p("/tmp/backdoor")
-    File.write!("/tmp/backdoor/password.txt", "")
+    NervesBackdoor.pass_set("")
     conn = conn(:get, "/ping")
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
 
-    #reenable password check
+    # reenable password check
     password = "otherpass"
-    File.write!("/tmp/backdoor/password.txt", password)
+    NervesBackdoor.pass_set(password)
     conn = conn(:get, "/ping")
     conn = EP.call(conn, @opts)
     assert conn.state == :set
@@ -164,12 +164,15 @@ defmodule NervesBackdoorTest do
     assert NervesBackdoor.password(:current) == password
     username = NervesBackdoor.name()
     auth = "Basic " <> Base.encode64(username <> ":" <> password)
-    conn = conn(:get, "/ping")
+
+    conn =
+      conn(:get, "/ping")
       |> put_req_header("authorization", auth)
+
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
-    File.rm("/tmp/backdoor/password.txt")
+    NervesBackdoor.pass_reset()
   end
 
   def basic_auth(conn) do

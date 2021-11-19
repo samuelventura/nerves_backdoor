@@ -21,7 +21,7 @@ defmodule NervesBackdoor.Reset do
 
   @impl true
   def handle_info({:circuits_gpio, _, _, _}, gpio) do
-    NervesBackdoor.passreset()
+    NervesBackdoor.pass_reset()
     {:noreply, gpio}
   end
 end

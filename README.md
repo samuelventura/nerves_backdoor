@@ -27,8 +27,8 @@ mix run discover.exs --no-start
 NervesBackdoor.mac
 NervesBackdoor.ifname
 NervesBackdoor.password
-NervesBackdoor.passset ""
-NervesBackdoor.passreset
+NervesBackdoor.pass_set ""
+NervesBackdoor.pass_reset
 Application.started_applications
 Application.loaded_applications
 Application.get_all_env :nerves_backdoor
