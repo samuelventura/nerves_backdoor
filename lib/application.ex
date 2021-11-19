@@ -3,7 +3,7 @@ defmodule NervesBackdoor.Application do
 
   @impl true
   def start(_type, _args) do
-    port = NervesBackdoor.Environ.port()
+    port = NervesBackdoor.port()
 
     children = [
       {NervesBackdoor.Reset, []},

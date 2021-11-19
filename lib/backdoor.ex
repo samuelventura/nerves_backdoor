@@ -1,4 +1,4 @@
-defmodule NervesBackdoor.Environ do
+defmodule NervesBackdoor do
   def home() do
     Application.get_env(:nerves_backdoor, :home)
   end
@@ -76,8 +76,8 @@ defmodule NervesBackdoor.Environ do
   end
 
   def blink() do
-    io = NervesBackdoor.Environ.io_led()
-    ms = NervesBackdoor.Environ.blink_ms()
+    io = NervesBackdoor.io_led()
+    ms = NervesBackdoor.blink_ms()
     {:ok, gpio} = NervesBackdoor.Gpio.output(io)
     :ok = NervesBackdoor.Gpio.write(gpio, 1)
     :timer.sleep(ms)

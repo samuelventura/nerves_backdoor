@@ -2,7 +2,7 @@ defmodule NervesBackdoor.Discovery do
   use GenServer
 
   def start_link(_opts \\ []) do
-    port = NervesBackdoor.Environ.port()
+    port = NervesBackdoor.port()
     GenServer.start_link(__MODULE__, port)
   end
 
@@ -20,14 +20,14 @@ defmodule NervesBackdoor.Discovery do
 
   @impl true
   def handle_info({:udp, socket, ip, port, data}, state) do
-    name = NervesBackdoor.Environ.name()
+    name = NervesBackdoor.name()
     message = Jason.decode!(data)
     case message do
       %{"action"=> "id", "name"=> ^name} ->
-        version = NervesBackdoor.Environ.version()
-        ifname = NervesBackdoor.Environ.ifname()
-        macaddr = NervesBackdoor.Environ.mac()
-        hostname = NervesBackdoor.Environ.hostname()
+        version = NervesBackdoor.version()
+        ifname = NervesBackdoor.ifname()
+        macaddr = NervesBackdoor.mac()
+        hostname = NervesBackdoor.hostname()
 
         data = %{
           name: name,
@@ -41,7 +41,7 @@ defmodule NervesBackdoor.Discovery do
         :ok = :gen_udp.send(socket, ip, port, Jason.encode!(message))
 
         %{"action"=> "blink", "name"=> ^name} ->
-          NervesBackdoor.Environ.blink()
+          NervesBackdoor.blink()
           :ok = :gen_udp.send(socket, ip, port, Jason.encode!(message))
     end
 

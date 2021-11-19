@@ -24,11 +24,11 @@ curl http://nerves.local:31680/app/stop/$APP
 
 ```bash
 mix run discover.exs --no-start
-NervesBackdoor.Environ.mac
-NervesBackdoor.Environ.ifname
-NervesBackdoor.Environ.password
-NervesBackdoor.Environ.passset ""
-NervesBackdoor.Environ.passreset
+NervesBackdoor.mac
+NervesBackdoor.ifname
+NervesBackdoor.password
+NervesBackdoor.passset ""
+NervesBackdoor.passreset
 Application.started_applications
 Application.loaded_applications
 Application.get_all_env :nerves_backdoor
@@ -64,4 +64,6 @@ be found at [https://hexdocs.pm/nerves_backdoor](https://hexdocs.pm/nerves_backd
 ## Research
 
 - Restrict cowboy listener to usb0 interface
-- Basic auth
+- Restrict discovery broadcast to eth0
+- VintageNet unrecoverable ETS error after setting invalid config
+

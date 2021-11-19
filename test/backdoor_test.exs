@@ -116,9 +116,9 @@ defmodule NervesBackdoorTest do
   end
 
   test "discovery id" do
-    name = NervesBackdoor.Environ.name()
+    name = NervesBackdoor.name()
     cmd = Jason.encode! %{action: "id", name: name}
-    port = NervesBackdoor.Environ.port()
+    port = NervesBackdoor.port()
     {:ok, socket} = :gen_udp.open(0, active: false, broadcast: true)
     :ok = :gen_udp.send(socket, {127,0,0,1}, port, cmd)
     msg = :gen_udp.recv(socket, 1024, 1000)
@@ -129,9 +129,9 @@ defmodule NervesBackdoorTest do
   end
 
   test "discovery blink" do
-    name = NervesBackdoor.Environ.name()
+    name = NervesBackdoor.name()
     cmd = Jason.encode! %{action: "blink", name: name}
-    port = NervesBackdoor.Environ.port()
+    port = NervesBackdoor.port()
     {:ok, socket} = :gen_udp.open(0, active: false, broadcast: true)
     :ok = :gen_udp.send(socket, {127,0,0,1}, port, cmd)
     msg = :gen_udp.recv(socket, 1024, 1000)
@@ -161,8 +161,8 @@ defmodule NervesBackdoorTest do
     assert conn.state == :set
     assert conn.status == 401
 
-    assert NervesBackdoor.Environ.password(:current) == password
-    username = NervesBackdoor.Environ.name()
+    assert NervesBackdoor.password(:current) == password
+    username = NervesBackdoor.name()
     auth = "Basic " <> Base.encode64(username <> ":" <> password)
     conn = conn(:get, "/ping")
       |> put_req_header("authorization", auth)
