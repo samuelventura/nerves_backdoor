@@ -8,7 +8,8 @@ defmodule NervesBackdoor.Discovery do
 
   @impl true
   def init(port) do
-    {:ok, socket} = :gen_udp.open(port, active: true, mode: :binary)
+    {:ok, socket} = :gen_udp.open(port, active: true,
+      mode: :binary, reuseaddr: true, ip: {0, 0, 0, 0})
     {:ok, {socket, port}}
   end
 

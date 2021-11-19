@@ -1,4 +1,4 @@
-defmodule NervesBackdoor.GPIO do
+defmodule NervesBackdoor.Gpio do
   use GenServer
 
   def start_link(_opts \\ []) do
@@ -50,26 +50,34 @@ defmodule NervesBackdoor.GPIO do
   end
 
   def io_output(port) do
-    :erlang.apply(Circuits.GPIO, :open, [port, :output])
+    Circuits.GPIO.open(port, :output)
   end
 
   def io_input(port) do
-    :erlang.apply(Circuits.GPIO, :open, [port, :input])
+    Circuits.GPIO.open(port, :input)
   end
 
   def io_write(gpio, value) do
-    :erlang.apply(Circuits.GPIO, :write, [gpio, value])
+    Circuits.GPIO.write(gpio, value)
   end
 
   def io_read(gpio) do
-    :erlang.apply(Circuits.GPIO, :read, [gpio])
+    Circuits.GPIO.read(gpio)
   end
 
   def io_rising(gpio) do
-    :erlang.apply(Circuits.GPIO, :set_interrupts, [gpio, :rising])
+    Circuits.GPIO.set_interrupts(gpio, :rising)
+  end
+
+  def io_falling(gpio) do
+    Circuits.GPIO.set_interrupts(gpio, :falling)
+  end
+
+  def io_both(gpio) do
+    Circuits.GPIO.set_interrupts(gpio, :both)
   end
 
   def io_close(gpio) do
-    :erlang.apply(Circuits.GPIO, :close, [gpio])
+    Circuits.GPIO.close(gpio)
   end
 end

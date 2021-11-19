@@ -7,7 +7,7 @@ defmodule NervesBackdoor.Application do
 
     children = [
       {NervesBackdoor.Reset, []},
-      {NervesBackdoor.GPIO, []},
+      {NervesBackdoor.Gpio, []},
       {NervesBackdoor.Vintage, []},
       {NervesBackdoor.Discovery, []},
       Plug.Cowboy.child_spec(

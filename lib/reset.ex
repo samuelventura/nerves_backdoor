@@ -3,20 +3,20 @@ defmodule NervesBackdoor.Reset do
 
   def start_link(_opts \\ []) do
     init_args = []
-    GenServer.start_link(__MODULE__, init_args, name: :nbd_gpio)
+    GenServer.start_link(__MODULE__, init_args, name: :nbd_reset)
   end
 
   @impl true
   def init(_args) do
     io = NervesBackdoor.Environ.io_btn()
-    {:ok, gpio} = NervesBackdoor.GPIO.io_input(io)
-    :ok = NervesBackdoor.GPIO.io_rising(gpio)
+    {:ok, gpio} = NervesBackdoor.Gpio.io_input(io)
+    :ok = NervesBackdoor.Gpio.io_rising(gpio)
     {:ok, gpio}
   end
 
   @impl true
   def terminate(_reason, gpio) do
-    :ok = NervesBackdoor.GPIO.io_input(gpio)
+    :ok = NervesBackdoor.Gpio.io_close(gpio)
   end
 
   @impl true

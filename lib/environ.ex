@@ -43,7 +43,7 @@ defmodule NervesBackdoor.Environ do
     |> String.replace(":", "")
   end
 
-  def password(type) do
+  def password(type \\ :current) do
     case type do
       :default -> mac()
 
@@ -58,7 +58,12 @@ defmodule NervesBackdoor.Environ do
   end
 
   def passreset() do
+    File.mkdir_p(home())
     File.rm(passpath())
+  end
+
+  def passset(password) do
+    File.write(passpath(), password)
   end
 
   def passpath() do
@@ -73,18 +78,18 @@ defmodule NervesBackdoor.Environ do
   def blink() do
     io = NervesBackdoor.Environ.io_led()
     ms = NervesBackdoor.Environ.blink_ms()
-    {:ok, gpio} = NervesBackdoor.GPIO.output(io)
-    :ok = NervesBackdoor.GPIO.write(gpio, 1)
+    {:ok, gpio} = NervesBackdoor.Gpio.output(io)
+    :ok = NervesBackdoor.Gpio.write(gpio, 1)
     :timer.sleep(ms)
-    :ok = NervesBackdoor.GPIO.write(gpio, 0)
+    :ok = NervesBackdoor.Gpio.write(gpio, 0)
     :timer.sleep(ms)
-    :ok = NervesBackdoor.GPIO.write(gpio, 1)
+    :ok = NervesBackdoor.Gpio.write(gpio, 1)
     :timer.sleep(ms)
-    :ok = NervesBackdoor.GPIO.write(gpio, 0)
+    :ok = NervesBackdoor.Gpio.write(gpio, 0)
     :timer.sleep(ms)
-    :ok = NervesBackdoor.GPIO.write(gpio, 1)
+    :ok = NervesBackdoor.Gpio.write(gpio, 1)
     :timer.sleep(ms)
-    :ok = NervesBackdoor.GPIO.write(gpio, 0)
-    :ok = NervesBackdoor.GPIO.close(gpio)
+    :ok = NervesBackdoor.Gpio.write(gpio, 0)
+    :ok = NervesBackdoor.Gpio.close(gpio)
   end
 end

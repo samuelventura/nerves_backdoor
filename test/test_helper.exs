@@ -1,6 +1,6 @@
 ExUnit.start()
 
-defmodule NervesBackdoor.TestGPIO do
+defmodule NervesBackdoor.TestGpio do
   use GenServer
 
   def start_link(_opts \\ []) do
@@ -86,5 +86,5 @@ Application.put_env(:nerves_backdoor, :hostname, "test")
 Application.put_env(:nerves_backdoor, :home, "/tmp/backdoor")
 File.rm("/tmp/backdoor/password.txt")
 NervesBackdoor.Discovery.start_link()
-NervesBackdoor.TestGPIO.start_link()
+NervesBackdoor.TestGpio.start_link()
 NervesBackdoor.TestVintageNet.start_link()

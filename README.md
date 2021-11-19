@@ -23,9 +23,15 @@ curl http://nerves.local:31680/app/stop/$APP
 ## Helpers
 
 ```bash
+mix run discover.exs --no-start
+NervesBackdoor.Environ.mac
+NervesBackdoor.Environ.ifname
+NervesBackdoor.Environ.password
+NervesBackdoor.Environ.passset ""
+NervesBackdoor.Environ.passreset
 Application.started_applications
 Application.loaded_applications
-Application.get_all_env :nss
+Application.get_all_env :nerves_backdoor
 ls "/data"
 VintageNet.info
 VintageNet.get_configuration("eth0")
