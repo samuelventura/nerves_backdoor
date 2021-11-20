@@ -66,4 +66,5 @@ be found at [https://hexdocs.pm/nerves_backdoor](https://hexdocs.pm/nerves_backd
 - Restrict cowboy listener to usb0 interface
 - Restrict discovery broadcast to eth0
 - VintageNet unrecoverable ETS error after setting invalid config
+- Customize and broadcast nerves-% hostname
 
