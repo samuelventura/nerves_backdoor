@@ -34,7 +34,7 @@ defmodule NervesBackdoor.Vintage do
         {:all_interfaces} ->
           :erlang.apply(VintageNet, :all_interfaces, [])
 
-        {:config, interface, params} ->
+        {:configure, interface, params} ->
           method = Map.fetch!(params, "method")
 
           config =
