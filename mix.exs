@@ -68,7 +68,7 @@ defmodule NervesBackdoor.MixProject do
 
   defp description do
     """
-    Nerves Backdoor - Setup and Maintenance RESTish API
+    Setup and Maintenance Tools with RESTish API
     """
   end
 end

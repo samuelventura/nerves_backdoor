@@ -1,6 +1,6 @@
 # NervesBackdoor
 
-RESTish API to cover basic mainteance needs:
+Setup and Maintenance Tools with RESTish API:
 
 - Network setup (eth0)
 - Device discovery (UDP broadcast)
