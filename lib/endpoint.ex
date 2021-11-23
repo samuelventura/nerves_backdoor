@@ -1,5 +1,6 @@
 defmodule NervesBackdoor.Endpoint do
   use Plug.Router
+  use Plug.ErrorHandler
 
   plug(:auth)
 
@@ -111,6 +112,12 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, result)
   end
 
+  @impl Plug.ErrorHandler
+  def handle_errors(conn, %{kind: kind, reason: reason, stack: _stack}) do
+    send_resp(conn, 500, Jason.encode!(%{result: "error", message:
+      %{kind: kind, reason: reason}}))
+  end
+
   defp app_loaded(app) do
     Enum.find(Application.loaded_applications(), fn tuple ->
       {atom, _desc, _ver} = tuple
@@ -129,7 +136,7 @@ defmodule NervesBackdoor.Endpoint do
         send_resp(conn, 200, Jason.encode!(%{result: "ok", message: message}))
 
       {:error, message} ->
-        send_resp(conn, 500, Jason.encode!(%{result: "error", message: message}))
+        send_resp(conn, 400, Jason.encode!(%{result: "error", message: message}))
     end
   end
 

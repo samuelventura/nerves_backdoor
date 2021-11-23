@@ -66,3 +66,6 @@ be found at [https://hexdocs.pm/nerves_backdoor](https://hexdocs.pm/nerves_backd
 - Restrict discovery broadcast to eth0
 - VintageNet unrecoverable ETS error after setting invalid config
 - Customize and broadcast nerves-% hostname
+- Nerves environ emulator for testing and trying out
+- Compile/load app from remote filesystem (dev workstation)
+- Run tests against live system
