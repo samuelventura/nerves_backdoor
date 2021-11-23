@@ -116,22 +116,22 @@ defmodule NervesBackdoorTest do
   end
 
   test "discovery id" do
-    name = NervesBackdoor.name()
+    name = NervesBackdoor.env_name()
     cmd = Jason.encode! %{action: "id", name: name}
-    port = NervesBackdoor.port()
+    port = NervesBackdoor.env_port()
     {:ok, socket} = :gen_udp.open(0, active: false, broadcast: true)
     :ok = :gen_udp.send(socket, {127,0,0,1}, port, cmd)
     msg = :gen_udp.recv(socket, 1024, 1000)
     {:ok, {{127,0,0,1}, ^port, packet}} = msg
     assert Jason.decode!(packet) ==  %{"name" => "nerves", "action" => "id", "data" =>
     %{"hostname" => "test", "ifname" => "ethx", "macaddr" => "000000000000",
-    "name" => "nerves", "version" => "0.1.1"}}
+    "name" => "nerves", "version" => "0.1.2"}}
   end
 
   test "discovery blink" do
-    name = NervesBackdoor.name()
+    name = NervesBackdoor.env_name()
     cmd = Jason.encode! %{action: "blink", name: name}
-    port = NervesBackdoor.port()
+    port = NervesBackdoor.env_port()
     {:ok, socket} = :gen_udp.open(0, active: false, broadcast: true)
     :ok = :gen_udp.send(socket, {127,0,0,1}, port, cmd)
     msg = :gen_udp.recv(socket, 1024, 1000)
@@ -147,22 +147,22 @@ defmodule NervesBackdoorTest do
 
     # disable password check
     File.mkdir_p("/tmp/backdoor")
-    NervesBackdoor.pass_set("")
+    NervesBackdoor.disable_pass()
     conn = conn(:get, "/ping")
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
 
     # reenable password check
-    password = "otherpass"
-    NervesBackdoor.pass_set(password)
+    password = "secret"
+    NervesBackdoor.set_pass(password)
     conn = conn(:get, "/ping")
     conn = EP.call(conn, @opts)
     assert conn.state == :set
     assert conn.status == 401
 
-    assert NervesBackdoor.password(:current) == password
-    username = NervesBackdoor.name()
+    assert NervesBackdoor.get_pass(:current) == password
+    username = NervesBackdoor.env_name()
     auth = "Basic " <> Base.encode64(username <> ":" <> password)
 
     conn =
@@ -172,7 +172,7 @@ defmodule NervesBackdoorTest do
     conn = EP.call(conn, @opts)
     assert conn.state == :sent
     assert conn.status == 200
-    NervesBackdoor.pass_reset()
+    NervesBackdoor.reset_pass()
   end
 
   def basic_auth(conn) do

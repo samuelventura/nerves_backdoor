@@ -24,11 +24,10 @@ curl http://nerves.local:31680/app/stop/$APP
 
 ```bash
 mix run discover.exs --no-start
-NervesBackdoor.mac
-NervesBackdoor.ifname
-NervesBackdoor.password
-NervesBackdoor.pass_set ""
-NervesBackdoor.pass_reset
+NervesBackdoor.get_pass :current|:default
+NervesBackdoor.set_pass "secret"
+NervesBackdoor.reset_pass
+NervesBackdoor.disable_pass
 Application.started_applications
 Application.loaded_applications
 Application.get_all_env :nerves_backdoor
@@ -67,4 +66,3 @@ be found at [https://hexdocs.pm/nerves_backdoor](https://hexdocs.pm/nerves_backd
 - Restrict discovery broadcast to eth0
 - VintageNet unrecoverable ETS error after setting invalid config
 - Customize and broadcast nerves-% hostname
-

@@ -77,6 +77,10 @@ defmodule NervesBackdoor.Gpio do
     Circuits.GPIO.set_interrupts(gpio, :both)
   end
 
+  def io_none(gpio) do
+    Circuits.GPIO.set_interrupts(gpio, :none)
+  end
+
   def io_close(gpio) do
     Circuits.GPIO.close(gpio)
   end

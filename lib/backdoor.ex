@@ -1,84 +1,98 @@
 defmodule NervesBackdoor do
-  def home() do
+  def env_home() do
     Application.get_env(:nerves_backdoor, :home)
   end
 
-  def name() do
+  def env_name() do
     Application.get_env(:nerves_backdoor, :name)
   end
 
-  def hostname() do
-    Application.get_env(:nerves_backdoor, :hostname, gethostname())
+  def env_hostname() do
+    Application.get_env(:nerves_backdoor, :hostname, get_hostname())
   end
 
-  def version() do
+  def env_version() do
     Application.get_env(:nerves_backdoor, :version)
   end
 
-  def port() do
+  def env_port() do
     Application.get_env(:nerves_backdoor, :port)
   end
 
-  def ifname() do
+  def env_ifname() do
     Application.get_env(:nerves_backdoor, :ifname)
   end
 
-  def io_led() do
+  def env_ioled() do
     Application.get_env(:nerves_backdoor, :io_led)
   end
 
-  def io_btn() do
+  def env_iobtn() do
     Application.get_env(:nerves_backdoor, :io_btn)
   end
 
-  def blink_ms() do
+  def env_blinkms() do
     Application.get_env(:nerves_backdoor, :blink_ms)
   end
 
-  def mac() do
-    case MACAddress.mac_address(ifname()) do
+  def get_mac(ifname \\ :env) do
+    ifname = case ifname do
+      :env -> env_ifname()
+      ifname -> ifname
+    end
+    case MACAddress.mac_address(ifname) do
       {:ok, mac} -> mac |> MACAddress.to_hex(case: :upper)
       _ -> "00:00:00:00:00:00"
     end
     |> String.replace(":", "")
   end
 
-  def password(type \\ :current) do
+  def get_pass(type \\ :current) do
     case type do
       :default ->
-        mac()
+        get_mac()
 
       :current ->
         path = pass_path()
 
         case File.read(path) do
           {:ok, data} -> String.trim(data)
-          _ -> mac()
+          _ -> get_mac()
         end
     end
   end
 
-  def pass_reset() do
-    File.mkdir_p(home())
+  def reset_pass() do
+    File.mkdir_p(env_home())
     File.rm(pass_path())
   end
 
-  def pass_set(password) do
+  def disable_pass() do
+    set_pass("")
+  end
+
+  def set_pass(password) do
     File.write(pass_path(), password)
   end
 
   def pass_path() do
-    Path.join(home(), "password.txt")
+    Path.join(env_home(), "password.txt")
   end
 
-  def gethostname() do
+  def get_hostname() do
     {:ok, hostname} = :inet.gethostname()
     hostname |> to_string
   end
 
-  def blink() do
-    io = NervesBackdoor.io_led()
-    ms = NervesBackdoor.blink_ms()
+  def io_blink(port \\ :env, ms \\ :env) do
+    io = case port do
+      :env -> NervesBackdoor.env_ioled()
+      port -> port
+    end
+    ms = case ms do
+      :env -> NervesBackdoor.env_blinkms()
+      ms -> ms
+    end
     {:ok, gpio} = NervesBackdoor.Gpio.output(io)
     :ok = NervesBackdoor.Gpio.write(gpio, 1)
     :timer.sleep(ms)

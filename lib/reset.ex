@@ -8,7 +8,7 @@ defmodule NervesBackdoor.Reset do
 
   @impl true
   def init(_args) do
-    io = NervesBackdoor.io_btn()
+    io = NervesBackdoor.env_iobtn()
     {:ok, gpio} = NervesBackdoor.Gpio.io_input(io)
     :ok = NervesBackdoor.Gpio.io_rising(gpio)
     {:ok, gpio}
@@ -21,7 +21,7 @@ defmodule NervesBackdoor.Reset do
 
   @impl true
   def handle_info({:circuits_gpio, _, _, _}, gpio) do
-    NervesBackdoor.pass_reset()
+    NervesBackdoor.reset_pass()
     {:noreply, gpio}
   end
 end

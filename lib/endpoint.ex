@@ -4,8 +4,8 @@ defmodule NervesBackdoor.Endpoint do
   plug(:auth)
 
   defp auth(conn, _opts) do
-      username = NervesBackdoor.name()
-      password = NervesBackdoor.password(:current)
+      username = NervesBackdoor.env_name()
+      password = NervesBackdoor.get_pass(:current)
       #disable password check by uploading empty password file
       case String.length(password) do
       0 -> conn
