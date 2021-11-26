@@ -28,10 +28,16 @@ NervesBackdoor.get_pass :current|:default
 NervesBackdoor.set_pass "secret"
 NervesBackdoor.reset_pass
 NervesBackdoor.disable_pass
+NervesBackdoor.io_blink :red|:green|:blue|<int> :env|<int>
+NervesBackdoor.io_output :red|:green|:blue|<int> 0|1
+NervesBackdoor.io_input :push|:env|<int>
 Application.started_applications
 Application.loaded_applications
+Application.start :nerves_backdoor
+Application.stop :nerves_backdoor
 Application.get_all_env :nerves_backdoor
 ls "/data"
+ls "/data/backdoor"
 VintageNet.info
 VintageNet.get_configuration("eth0")
 VintageNet.get(["interface", "eth0", "type"])
@@ -69,3 +75,6 @@ be found at [https://hexdocs.pm/nerves_backdoor](https://hexdocs.pm/nerves_backd
 - Nerves environ emulator for testing and trying out
 - Compile/load app from remote filesystem (dev workstation)
 - Run tests against live system
+- Minimize web response to ___code error|json___
+- Custom Jason encoder for erlang strings
+- Circuits.GPIO multiple references and closing

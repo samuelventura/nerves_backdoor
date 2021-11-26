@@ -23,16 +23,36 @@ defmodule NervesBackdoor do
     Application.get_env(:nerves_backdoor, :ifname)
   end
 
-  def env_ioled() do
-    Application.get_env(:nerves_backdoor, :io_led)
+  def env_red() do
+    Application.get_env(:nerves_backdoor, :io_red)
   end
 
-  def env_iobtn() do
-    Application.get_env(:nerves_backdoor, :io_btn)
+  def env_green() do
+    Application.get_env(:nerves_backdoor, :io_green)
   end
 
-  def env_blinkms() do
+  def env_blue() do
+    Application.get_env(:nerves_backdoor, :io_blue)
+  end
+
+  def env_push() do
+    Application.get_env(:nerves_backdoor, :io_push)
+  end
+
+  def env_blink_ms() do
     Application.get_env(:nerves_backdoor, :blink_ms)
+  end
+
+  def env_blink_color() do
+    Application.get_env(:nerves_backdoor, :blink_color)
+  end
+
+  def env_reset_ms() do
+    Application.get_env(:nerves_backdoor, :reset_ms)
+  end
+
+  def env_reset_color() do
+    Application.get_env(:nerves_backdoor, :reset_color)
   end
 
   def get_mac(ifname \\ :env) do
@@ -84,13 +104,15 @@ defmodule NervesBackdoor do
     hostname |> to_string
   end
 
-  def io_blink(port \\ :env, ms \\ :env) do
+  def io_blink(port, ms \\ :env) do
     io = case port do
-      :env -> NervesBackdoor.env_ioled()
+      :red -> NervesBackdoor.env_red()
+      :green -> NervesBackdoor.env_green()
+      :blue -> NervesBackdoor.env_blue()
       port -> port
     end
     ms = case ms do
-      :env -> NervesBackdoor.env_blinkms()
+      :env -> NervesBackdoor.env_blink_ms()
       ms -> ms
     end
     {:ok, gpio} = NervesBackdoor.Gpio.output(io)
@@ -106,5 +128,30 @@ defmodule NervesBackdoor do
     :timer.sleep(ms)
     :ok = NervesBackdoor.Gpio.write(gpio, 0)
     :ok = NervesBackdoor.Gpio.close(gpio)
+  end
+
+  def io_input(port \\ :env) do
+    io = case port do
+      :env -> NervesBackdoor.env_push()
+      :push -> NervesBackdoor.env_push()
+      port -> port
+    end
+    {:ok, gpio} = NervesBackdoor.Gpio.input(io)
+    value = NervesBackdoor.Gpio.read(gpio)
+    :ok = NervesBackdoor.Gpio.close(gpio)
+    value
+  end
+
+  def io_output(port, value) do
+    io = case port do
+      :red -> NervesBackdoor.env_red()
+      :green -> NervesBackdoor.env_green()
+      :blue -> NervesBackdoor.env_blue()
+      port -> port
+    end
+    {:ok, gpio} = NervesBackdoor.Gpio.output(io)
+    NervesBackdoor.Gpio.write(gpio, value)
+    :ok = NervesBackdoor.Gpio.close(gpio)
+    value
   end
 end

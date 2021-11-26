@@ -21,6 +21,7 @@ defmodule NervesBackdoor.Discovery do
   @impl true
   def handle_info({:udp, socket, ip, port, data}, state) do
     name = NervesBackdoor.env_name()
+    color = NervesBackdoor.env_blink_color()
     message = Jason.decode!(data)
     case message do
       %{"action"=> "id", "name"=> ^name} ->
@@ -41,7 +42,7 @@ defmodule NervesBackdoor.Discovery do
         :ok = :gen_udp.send(socket, ip, port, Jason.encode!(message))
 
         %{"action"=> "blink", "name"=> ^name} ->
-          NervesBackdoor.io_blink()
+          NervesBackdoor.io_blink(color)
           :ok = :gen_udp.send(socket, ip, port, Jason.encode!(message))
     end
 
