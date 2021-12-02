@@ -21,7 +21,7 @@ defmodule NervesBackdoor.Discovery do
 
   @impl true
   def handle_info({:udp, socket, ip, port, data}, state) do
-    IO.inspect(data)
+    IO.inspect({ip, port, data})
     name = NervesBackdoor.env_name()
     color = NervesBackdoor.env_blink_color()
     message = Jason.decode!(data)
