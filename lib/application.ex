@@ -4,6 +4,8 @@ defmodule NervesBackdoor.Application do
   @impl true
   def start(_type, _args) do
     port = NervesBackdoor.env_port()
+    home = NervesBackdoor.env_home()
+    File.mkdir_p(home)
 
     children = [
       {NervesBackdoor.Reset, []},

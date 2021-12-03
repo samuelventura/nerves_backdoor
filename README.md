@@ -38,6 +38,10 @@ Application.stop :nerves_backdoor
 Application.get_all_env :nerves_backdoor
 ls "/data"
 ls "/data/backdoor"
+ifconfig
+cmd "reboot"
+cmd "poweroff"
+cmd "cat /data/backdoor/password.txt"
 VintageNet.info
 VintageNet.get_configuration("eth0")
 VintageNet.get(["interface", "eth0", "type"])
