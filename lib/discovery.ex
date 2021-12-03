@@ -48,6 +48,10 @@ defmodule NervesBackdoor.Discovery do
       %{"action" => "blink", "name" => ^name} ->
         NervesBackdoor.io_blink(color)
         :ok = :gen_udp.send(socket, ip, port, Jason.encode!(message))
+
+      # other names are posible
+      _ ->
+        :ignored
     end
 
     {:noreply, state}
