@@ -28,14 +28,15 @@ NervesBackdoor.get_pass :current|:default
 NervesBackdoor.set_pass "secret"
 NervesBackdoor.reset_pass
 NervesBackdoor.disable_pass
-NervesBackdoor.io_blink :red|:green|:blue|<int> :env|<int>
-NervesBackdoor.io_output :red|:green|:blue|<int> 0|1
+NervesBackdoor.io_blink :red|:green|:blue|<int>, :env|<int>
+NervesBackdoor.io_output :red|:green|:blue|<int>, 0|1
 NervesBackdoor.io_input :push|:env|<int>
 Application.started_applications
 Application.loaded_applications
 Application.start :nerves_backdoor
 Application.stop :nerves_backdoor
 Application.get_all_env :nerves_backdoor
+Application.ensure_all_started :nerves_backdoor
 ls "/data"
 ls "/data/backdoor"
 ifconfig

@@ -140,6 +140,9 @@ defmodule NervesBackdoor do
       case port do
         :env -> NervesBackdoor.env_push()
         :push -> NervesBackdoor.env_push()
+        :red -> NervesBackdoor.env_red()
+        :green -> NervesBackdoor.env_green()
+        :blue -> NervesBackdoor.env_blue()
         port -> port
       end
 
