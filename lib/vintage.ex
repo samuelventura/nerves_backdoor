@@ -48,18 +48,18 @@ defmodule NervesBackdoor.Vintage do
                 gateway = Map.fetch!(params, "gateway")
                 name_servers = Map.fetch!(params, "name_servers")
 
-                #check valid ipv4
+                # check valid ipv4
                 {:ok, address_ip} = parse_ipv4(address)
                 {:ok, gateway_ip} = parse_ipv4(gateway)
+
                 Enum.map(name_servers, fn ips ->
                   {:ok, ip} = parse_ipv4(ips)
                   ip
-                 end)
-                #check address and gateway belong to same segment
-                address_sn = :erlang.apply(VintageNet.IP,
-                  :to_subnet, [address_ip, prefix_length])
-                gateway_sn = :erlang.apply(VintageNet.IP,
-                  :to_subnet, [gateway_ip, prefix_length])
+                end)
+
+                # check address and gateway belong to same segment
+                address_sn = :erlang.apply(VintageNet.IP, :to_subnet, [address_ip, prefix_length])
+                gateway_sn = :erlang.apply(VintageNet.IP, :to_subnet, [gateway_ip, prefix_length])
                 ^address_sn = gateway_sn
 
                 %{

@@ -2,16 +2,17 @@ defmodule NervesBackdoor.Endpoint do
   use Plug.Router
   use Plug.ErrorHandler
 
+  plug(CORSPlug)
   plug(:auth)
 
   defp auth(conn, _opts) do
-      username = NervesBackdoor.env_name()
-      password = NervesBackdoor.get_pass(:current)
-      #disable password check by uploading empty password file
-      case String.length(password) do
+    username = NervesBackdoor.env_name()
+    password = NervesBackdoor.get_pass(:current)
+    # disable password check by uploading empty password file
+    case String.length(password) do
       0 -> conn
       _ -> Plug.BasicAuth.basic_auth(conn, username: username, password: password)
-      end
+    end
   end
 
   plug(:match)
@@ -114,8 +115,11 @@ defmodule NervesBackdoor.Endpoint do
 
   @impl Plug.ErrorHandler
   def handle_errors(conn, %{kind: kind, reason: reason, stack: _stack}) do
-    send_resp(conn, 500, Jason.encode!(%{result: "error", message:
-      %{kind: kind, reason: reason}}))
+    send_resp(
+      conn,
+      500,
+      Jason.encode!(%{result: "error", message: %{kind: kind, reason: reason}})
+    )
   end
 
   defp app_loaded(app) do

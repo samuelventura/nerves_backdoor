@@ -22,17 +22,21 @@ defmodule NervesBackdoor.Reset do
   @impl true
   def handle_info({:circuits_gpio, io, _, value}, state) do
     IO.inspect({"Edge", io, value})
-    state = case value do
-      1 ->
-        ms = NervesBackdoor.env_reset_ms()
-        {:ok, timer} = :timer.send_after(ms, :reset_timer)
-        IO.inspect({"Reset timer setup", ms})
-        Map.put(state, :timer, timer)
-      0 ->
-        {timer, state} = Map.pop(state, :timer)
-        cancel_timer(timer)
-        state
-    end
+
+    state =
+      case value do
+        1 ->
+          ms = NervesBackdoor.env_reset_ms()
+          {:ok, timer} = :timer.send_after(ms, :reset_timer)
+          IO.inspect({"Reset timer setup", ms})
+          Map.put(state, :timer, timer)
+
+        0 ->
+          {timer, state} = Map.pop(state, :timer)
+          cancel_timer(timer)
+          state
+      end
+
     {:noreply, state}
   end
 
@@ -44,12 +48,13 @@ defmodule NervesBackdoor.Reset do
     NervesBackdoor.io_blink(color)
     {timer, state} = Map.pop(state, :timer)
     cancel_timer(timer)
-  {:noreply, state}
+    {:noreply, state}
   end
 
   defp cancel_timer(nil), do: nil
+
   defp cancel_timer(timer) do
-      result = :timer.cancel(timer)
-      IO.inspect({"Reset timer cancel", result})
+    result = :timer.cancel(timer)
+    IO.inspect({"Reset timer cancel", result})
   end
 end

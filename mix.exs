@@ -26,9 +26,21 @@ defmodule NervesBackdoor.MixProject do
     [
       extra_applications: [:logger, :plug, :jason, :plug_cowboy, :mac_address, :circuits_gpio],
       mod: {NervesBackdoor.Application, []},
-      env: [port: 31680, name: "nerves", home: "/data/backdoor", version: @version,
-        ifname: "eth0", io_push: 47, io_red: 66, io_green: 69, io_blue: 45,
-        blink_ms: 200, blink_color: :blue, reset_color: :red, reset_ms: 3000]
+      env: [
+        port: 31680,
+        name: "nerves",
+        home: "/data/backdoor",
+        version: @version,
+        ifname: "eth0",
+        io_push: 47,
+        io_red: 66,
+        io_green: 69,
+        io_blue: 45,
+        blink_ms: 200,
+        blink_color: :blue,
+        reset_color: :red,
+        reset_ms: 3000
+      ]
     ]
   end
 
@@ -45,6 +57,7 @@ defmodule NervesBackdoor.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:mac_address, "~> 0.0.1"},
       {:circuits_gpio, "~> 0.4"},
+      {:cors_plug, "~> 2.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
