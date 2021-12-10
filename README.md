@@ -10,14 +10,18 @@ Setup and Maintenance Tools with RESTish API:
 ## API
 
 ```bash
+curl http://nerves.local:31680/ping -u nerves:MAC
 curl http://nerves.local:31680/ping
 curl http://nerves.local:31680/data/$DB.db3 --output /tmp/$DB.db3
-curl -F 'file=@/tmp/$DB.db3' http://nerves.local:31680/upload?path=/data/$DB.db3
+curl http://nerves.local:31680/upload?path=/data/$DB.db3 -F 'file=@/tmp/$DB.db3'
 curl http://nerves.local:31680/net/state/eth0
 curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
 curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
 curl http://nerves.local:31680/app/start/$APP
 curl http://nerves.local:31680/app/stop/$APP
+curl http://nerves.local:31680/pass/set -X POST --data "pass=secret64"
+curl http://nerves.local:31680/pass/disabled
+curl http://nerves.local:31680/pass/reset
 ```
 
 ## Helpers

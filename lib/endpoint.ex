@@ -50,6 +50,29 @@ defmodule NervesBackdoor.Endpoint do
     respond(conn, result)
   end
 
+  # curl http://localhost:31680/pass/reset
+  # curl http://nerves.local:31680/pass/reset
+  get "/pass/reset" do
+    result = NervesBackdoor.reset_pass()
+    respond(conn, result)
+  end
+
+  # curl http://localhost:31680/pass/disable
+  # curl http://nerves.local:31680/pass/disable
+  get "/pass/disable" do
+    result = NervesBackdoor.disable_pass()
+    respond(conn, result)
+  end
+
+  # curl -X POST http://localhost:31680/pass/set --data "pass=secret64"
+  # curl -X POST http://nerves.local:31680/pass/set --data "pass=secret64"
+  post "/pass/set" do
+    {:ok, pass64} = Map.fetch(conn.params, "pass")
+    {:ok, pass} = Base.decode64(pass64)
+    result = NervesBackdoor.set_pass(pass)
+    respond(conn, result)
+  end
+
   # curl http://localhost:31680/net/all
   # curl http://nerves.local:31680/net/all
   get "/net/all" do
