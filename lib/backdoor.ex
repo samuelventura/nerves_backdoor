@@ -166,4 +166,11 @@ defmodule NervesBackdoor do
     :ok = NervesBackdoor.Gpio.close(gpio)
     value
   end
+
+  def reset_network() do
+    NervesBackdoor.Vintage.configure(
+      NervesBackdoor.env_ifname(),
+      %{"method" => "dhcp"}
+    )
+  end
 end

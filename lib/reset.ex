@@ -45,6 +45,8 @@ defmodule NervesBackdoor.Reset do
     color = NervesBackdoor.env_reset_color()
     IO.inspect("Password reset")
     NervesBackdoor.reset_pass()
+    IO.inspect("Network reset")
+    NervesBackdoor.reset_network()
     NervesBackdoor.io_blink(color)
     {timer, state} = Map.pop(state, :timer)
     cancel_timer(timer)
