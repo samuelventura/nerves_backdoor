@@ -1,6 +1,6 @@
 # NervesBackdoor
 
-Setup and Maintenance Tools with RESTish API:
+Setup and Maintenance Tools with Web API:
 
 - Network setup (eth0)
 - Device discovery (UDP broadcast)
